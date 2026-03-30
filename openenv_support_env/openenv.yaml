@@ -1,0 +1,64 @@
+name: customer_support_ticket_resolution
+version: 1.0.0
+description: >
+  OpenEnv-compatible step-based environment for evaluating AI agents on
+  customer support ticket workflows: classification, response generation,
+  and escalation handling.
+
+entrypoint: env:SupportEnv
+default_task: hard
+
+action_space:
+  type: object
+  fields:
+    action_type:
+      type: string
+      enum: [classify, respond, escalate]
+      description: Primary action intent for the current ticket.
+    category:
+      type: string
+      nullable: true
+      enum: [delivery, refund, technical, general]
+      description: Predicted ticket category.
+    response:
+      type: string
+      nullable: true
+      description: Agent response text to the customer.
+
+observation_space:
+  type: object
+  fields:
+    current_ticket:
+      type: object
+      fields:
+        id: { type: integer }
+        content: { type: string }
+        priority:
+          type: string
+          enum: [low, medium, high]
+    history:
+      type: array
+      items:
+        type: object
+        fields:
+          action_type:
+            type: string
+            enum: [classify, respond, escalate]
+          category:
+            type: string
+            nullable: true
+            enum: [delivery, refund, technical, general]
+          response:
+            type: string
+            nullable: true
+
+tasks:
+  easy:
+    description: Classify ticket category only.
+    scoring: correct classification = 1.0, else 0.0
+  medium:
+    description: Classify and provide an appropriate response.
+    scoring: classification = 0.5, response quality = 0.5
+  hard:
+    description: Classify, respond, and escalate appropriately for high priority tickets.
+    scoring: classification = 0.3, response quality = 0.4, escalation correctness = 0.3
