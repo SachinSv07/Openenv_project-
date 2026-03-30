@@ -1,150 +1,167 @@
-# OpenEnv Customer Support Ticket Resolution Environment
+# Customer Support AI Evaluation Environment (OpenEnv)
 
-A complete OpenEnv-compatible environment for evaluating AI agents on customer support workflows.
+## Overview
 
-## Problem Description
+This project provides a realistic, OpenEnv-compatible benchmark for customer support automation.
 
-This environment simulates a realistic customer support queue where an agent must:
+Agents are evaluated on their ability to:
 
-1. classify each ticket
-2. choose an appropriate response
-3. escalate when priority requires it
+1. classify support tickets,
+2. generate useful responses,
+3. decide when escalation is required.
 
-The environment is step-based and deterministic, making it suitable for repeatable benchmarking and CI evaluation.
+The benchmark is designed to assess reasoning and decision quality, not shallow keyword matching.
 
-## Why This Matters
+## Motivation
 
-Customer support automation is a practical real-world AI use case. Strong support agents need to balance:
+Customer support is a high-impact AI use case where errors directly affect trust, retention, and operational cost.
 
-- intent understanding (classification)
-- communication quality (response selection)
-- risk handling (escalation)
+Most benchmarks focus on isolated classification quality. This environment evaluates full triage behavior: categorization, response quality, escalation decisions, history-aware consistency, and efficiency.
 
-This benchmark captures all three.
+## Why This Environment Matters
 
-## Action Space
+- Customer support is a real-world, high-impact domain where AI systems must combine reasoning, language understanding, and decision-making.
+- This environment evaluates not just correctness, but quality of responses, escalation decisions, and efficiency.
+- Unlike simple benchmarks, it discourages shortcut strategies such as keyword matching or reward hacking.
+- It provides a more realistic measure of how AI agents perform in production-like workflows.
 
-`Action` fields:
+## Environment Design
 
-- `action_type`: one of `classify`, `respond`, `escalate`
-- `category`: optional predicted category in `{delivery, refund, technical, general}`
-- `response`: optional response text
+### Observation Space
 
-## Observation Structure
+- `current_ticket` (public-only fields)
+  - `id`
+  - `content`
+  - `priority`
+- `history` (past actions)
 
-`Observation` fields:
+Ground-truth category is hidden from observations to prevent leakage.
 
-- `current_ticket`: current `PublicTicket`
-  - `id`: int
-  - `content`: str
-  - `priority`: str in `{low, medium, high}`
-- `history`: list of prior `Action` objects
+### Action Space
 
-Ground-truth `category` is hidden from the observation and used internally by the grader.
+- `action_type`: `classify` | `respond` | `escalate`
+- `category`: `delivery` | `refund` | `technical` | `general`
+- `response`: free-text response
+- `escalate`: optional boolean escalation signal
+
+### Reward System
+
+Hard-task composition:
+
+- classification: up to `0.3`
+- response quality: up to `0.4`
+- escalation decision: up to `0.3`
+
+Additional shaping:
+
+- penalties for mistakes (wrong class, contradiction, escalation errors)
+- history-aware penalties for repeated mistakes
+- efficiency shaping (strict one-step quality bonus)
+
+All final scores are clipped to `[0.0, 1.0]`.
 
 ## Tasks
 
 ### Easy
-- objective: classify ticket correctly
-- reward:
-  - correct classification: `1.0`
-  - wrong/missing classification: `0.0`
+
+Classification only.
 
 ### Medium
-- objective: classify + provide suitable response
-- reward:
-  - classification: `0.5`
-  - response quality: `0.5` (keyword-based deterministic grading)
+
+Classification + response quality.
 
 ### Hard
-- objective: classify + respond + escalate correctly for high-priority tickets
-- reward:
-  - classification: `0.3`
-  - response quality: `0.4`
-  - escalation correctness: `0.3`
 
-## Deterministic Grading
+Classification + response + escalation + efficiency + history-aware penalties.
 
-- category: exact match
-- response quality: keyword matching against category-specific vocab
-- escalation:
-  - high priority requires `action_type == "escalate"`
-  - non-high priority should not escalate
+## Dataset
 
-All per-step scores are bounded to `[0.0, 1.0]`.
+The dataset contains 20+ realistic tickets featuring:
 
-## Project Structure
+- ambiguous phrasing,
+- mixed intents,
+- emotional tone,
+- practical production-like support scenarios.
 
-```
-openenv_support_env/
-├── env.py
-├── models.py
-├── tasks/
-│   ├── easy.py
-│   ├── medium.py
-│   └── hard.py
-├── graders/
-│   ├── easy_grader.py
-│   ├── medium_grader.py
-│   └── hard_grader.py
-├── data/
-│   └── tickets.json
-├── baseline.py
-├── openenv.yaml
-├── Dockerfile
-├── requirements.txt
-└── README.md
+Representative cases include mixed delivery/billing concerns, confirmation follow-ups, repeated frustration, and intentionally ambiguous requests.
+
+## Example Output
+
+Sample hard-task output (abridged):
+
+```text
+Ticket  2 | Predicted: refund | Escalated: no | Score: 0.60
+Reason: Classification is correct. Response is generic and lacks actionable detail (0.1). ...
+
+Ticket  5 | Predicted: technical | Escalated: yes | Score: 0.15
+Reason: Classification is not exact, but partially plausible ... Wrong classification penalty applied ...
+
+Ticket  9 | Predicted: delivery | Escalated: yes | Score: 1.00
+Reason: Classification is correct. Strong response with issue-specific handling and actionable detail (0.4). ...
+
+Processed tickets: 24
+Average score: ~0.63
 ```
 
-## Setup
-
-1. Create and activate a Python 3.10+ environment.
-2. Install dependencies:
+## Setup Instructions
 
 ```bash
 pip install -r requirements.txt
-```
-
-## Run Baseline
-
-From `openenv_support_env`:
-
-```bash
 python baseline.py --task hard
 ```
 
-You can also evaluate other tasks:
+## Docker Instructions
 
 ```bash
-python baseline.py --task easy
-python baseline.py --task medium
+docker build -t support-env .
+docker run support-env
 ```
 
-## Example Output (Hard Task)
+## Hugging Face Deployment
 
-```
-Ticket  1 | task=hard   | score=1.00 | reason=Classification, response, and escalation are all correct.
-Ticket  2 | task=hard   | score=1.00 | reason=Classification, response, and escalation are all correct.
-...
---------------------------------------------------------------------------------
-Processed tickets: 18
-Total score: 17.40
-Average score: 0.967
-```
+1. Push this repository to Hugging Face Spaces.
+2. Create a Space using the **Docker** SDK.
+3. Keep `Dockerfile` at repository root.
+4. Add topic/tag metadata including `openenv`.
 
-(Exact scores depend on the baseline heuristic decisions, but are fully reproducible.)
+## Baseline Results
 
-## Docker
+Current baseline average is typically around `0.6` to `0.7` on the hard task.
 
-Build and run:
+The baseline agent intentionally uses simple heuristic rules and is not optimized for the grading system. This ensures the environment meaningfully differentiates stronger reasoning-based agents from weaker ones, preventing inflated benchmark scores.
 
-```bash
-docker build -t openenv-support-env .
-docker run --rm openenv-support-env
-```
+The baseline is intentionally imperfect because:
 
-Default container command runs:
+- heuristics are simple,
+- responses are often generic,
+- ambiguous tickets trigger partial-credit and penalty cases.
 
-```bash
-python baseline.py --task hard
+## Key Features
+
+- no ground-truth leakage in observation
+- nuanced reward shaping
+- explainable grading reasons
+- history-aware penalty logic
+- efficiency-based scoring
+- deterministic evaluation behavior
+- Designed to prevent reward hacking and keyword-based exploitation through hidden ground-truth labels and strict, category-aware grading.
+
+## Limitations
+
+- Rule-based grading may not fully capture nuanced human judgment.
+- Dataset size is limited but designed for diversity and ambiguity.
+- Future work can include LLM-based evaluation or larger datasets.
+
+## Project Structure
+
+```text
+openenv_support_env/
+├── env.py
+├── models.py
+├── graders/
+├── data/
+├── baseline.py
+├── openenv.yaml
+├── Dockerfile
+└── requirements.txt
 ```

@@ -22,6 +22,7 @@ class Action(BaseModel):
     action_type: Literal["classify", "respond", "escalate"]
     category: Optional[Literal["delivery", "refund", "technical", "general"]] = None
     response: Optional[str] = None
+    escalate: Optional[bool] = None
 
 
 class Observation(BaseModel):

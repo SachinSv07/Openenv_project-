@@ -1,29 +1,7 @@
-name: customer_support_ticket_resolution
-version: 1.0.0
-description: >
-  OpenEnv-compatible step-based environment for evaluating AI agents on
-  customer support ticket workflows: classification, response generation,
-  and escalation handling.
-
-entrypoint: env:SupportEnv
-default_task: hard
-
-action_space:
-  type: object
-  fields:
-    action_type:
-      type: string
-      enum: [classify, respond, escalate]
-      description: Primary action intent for the current ticket.
-    category:
-      type: string
-      nullable: true
-      enum: [delivery, refund, technical, general]
-      description: Predicted ticket category.
-    response:
-      type: string
-      nullable: true
-      description: Agent response text to the customer.
+name: customer-support-env
+description: Realistic customer support ticket triage and response environment
+version: "1.0.0"
+entry_point: env:SupportEnv
 
 observation_space:
   type: object
@@ -31,34 +9,66 @@ observation_space:
     current_ticket:
       type: object
       fields:
-        id: { type: integer }
-        content: { type: string }
+        id:
+          type: int
+        content:
+          type: str
         priority:
-          type: string
+          type: str
           enum: [low, medium, high]
     history:
-      type: array
+      type: list
       items:
         type: object
         fields:
           action_type:
-            type: string
+            type: str
             enum: [classify, respond, escalate]
           category:
-            type: string
-            nullable: true
+            type: str
             enum: [delivery, refund, technical, general]
-          response:
-            type: string
             nullable: true
+          response:
+            type: str
+            nullable: true
+          escalate:
+            type: bool
+            nullable: true
+
+action_space:
+  type: object
+  fields:
+    action_type:
+      type: str
+      enum: [classify, respond, escalate]
+    category:
+      type: str
+      enum: [delivery, refund, technical, general]
+      nullable: true
+    response:
+      type: str
+      nullable: true
+    escalate:
+      type: bool
+      nullable: true
+
+reward:
+  type: object
+  fields:
+    score:
+      type: float
+      minimum: 0.0
+      maximum: 1.0
+    reason:
+      type: str
 
 tasks:
   easy:
-    description: Classify ticket category only.
-    scoring: correct classification = 1.0, else 0.0
+    description: Classification-only evaluation.
+    objective: Predict the correct ticket category.
   medium:
-    description: Classify and provide an appropriate response.
-    scoring: classification = 0.5, response quality = 0.5
+    description: Classification and response evaluation.
+    objective: Predict category and provide relevant customer response.
   hard:
-    description: Classify, respond, and escalate appropriately for high priority tickets.
-    scoring: classification = 0.3, response quality = 0.4, escalation correctness = 0.3
+    description: Full triage evaluation with escalation and efficiency shaping.
+    objective: Classify, respond, escalate when needed, and resolve efficiently.

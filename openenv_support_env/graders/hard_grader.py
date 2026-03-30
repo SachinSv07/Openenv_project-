@@ -11,7 +11,7 @@ from graders.common import (
 
 def _escalation_analysis(ticket: Ticket, action: Action) -> tuple[float, float, bool, str]:
     is_high_priority = ticket.priority == "high"
-    escalated = action.action_type == "escalate"
+    escalated = action.escalate if action.escalate is not None else (action.action_type == "escalate")
 
     if is_high_priority and escalated:
         return 0.3, 0.0, False, "Escalation was correctly used for a high-priority ticket."
