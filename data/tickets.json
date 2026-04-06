@@ -1,0 +1,146 @@
+[
+  {
+    "id": 1,
+    "content": "I placed an order last week and still haven't received anything. Can you check?",
+    "category": "delivery",
+    "priority": "high"
+  },
+  {
+    "id": 2,
+    "content": "The product arrived damaged and I want my money back.",
+    "category": "refund",
+    "priority": "medium"
+  },
+  {
+    "id": 3,
+    "content": "The app crashes whenever I try to make a payment.",
+    "category": "technical",
+    "priority": "high"
+  },
+  {
+    "id": 4,
+    "content": "This is the third time I'm facing this issue. Very disappointed.",
+    "category": "general",
+    "priority": "medium"
+  },
+  {
+    "id": 5,
+    "content": "Tracking updated to out for delivery two days ago, but nothing came.",
+    "category": "delivery",
+    "priority": "high"
+  },
+  {
+    "id": 6,
+    "content": "I canceled my subscription before renewal, but I was still billed.",
+    "category": "refund",
+    "priority": "high"
+  },
+  {
+    "id": 7,
+    "content": "I cannot sign in after the latest update and it keeps looping.",
+    "category": "technical",
+    "priority": "medium"
+  },
+  {
+    "id": 8,
+    "content": "Could you explain the difference between the Basic and Pro plans?",
+    "category": "general",
+    "priority": "low"
+  },
+  {
+    "id": 9,
+    "content": "My package says delivered to mailbox, but there is nothing there.",
+    "category": "delivery",
+    "priority": "high"
+  },
+  {
+    "id": 10,
+    "content": "I returned the item last week. When will the refund be issued?",
+    "category": "refund",
+    "priority": "medium"
+  },
+  {
+    "id": 11,
+    "content": "Checkout freezes right after OTP verification.",
+    "category": "technical",
+    "priority": "high"
+  },
+  {
+    "id": 12,
+    "content": "Where can I download invoices for my last three purchases?",
+    "category": "general",
+    "priority": "low"
+  },
+  {
+    "id": 13,
+    "content": "Courier attempted delivery, but no one contacted me for redelivery.",
+    "category": "delivery",
+    "priority": "medium"
+  },
+  {
+    "id": 14,
+    "content": "You charged me twice for one order. Please fix this.",
+    "category": "refund",
+    "priority": "high"
+  },
+  {
+    "id": 15,
+    "content": "Push notifications stopped working after yesterday's patch.",
+    "category": "technical",
+    "priority": "medium"
+  },
+  {
+    "id": 16,
+    "content": "I am confused about how to update my phone number on the account.",
+    "category": "general",
+    "priority": "medium"
+  },
+  {
+    "id": 17,
+    "content": "Express delivery promised 2 days, now it's day 6 and no update.",
+    "category": "delivery",
+    "priority": "high"
+  },
+  {
+    "id": 18,
+    "content": "The return was accepted, but I still don't see the credit on my card.",
+    "category": "refund",
+    "priority": "medium"
+  },
+  {
+    "id": 19,
+    "content": "The web dashboard loads but buttons do nothing when I click save.",
+    "category": "technical",
+    "priority": "medium"
+  },
+  {
+    "id": 20,
+    "content": "Can I transfer my membership to my spouse?",
+    "category": "general",
+    "priority": "low"
+  },
+  {
+    "id": 21,
+    "content": "I was charged twice but also never received my order. What is happening?",
+    "category": "refund",
+    "priority": "high"
+  },
+  {
+    "id": 22,
+    "content": "The issue seems fixed now, just wanted to confirm if anything else is needed.",
+    "category": "general",
+    "priority": "low"
+  },
+  {
+    "id": 23,
+    "content": "This is the third time this month your app failed at checkout. I'm very frustrated.",
+    "category": "technical",
+    "priority": "high"
+  },
+  {
+    "id": 24,
+    "content": "I need help with my recent purchase.",
+    "category": "general",
+    "priority": "medium"
+  }
+]

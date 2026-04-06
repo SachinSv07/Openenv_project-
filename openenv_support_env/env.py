@@ -177,3 +177,7 @@ class SupportEnv:
     @staticmethod
     def _compose_reason(base_reason: str, history_reason: str, efficiency_reason: str) -> str:
         return f"{base_reason} {history_reason} {efficiency_reason}"
+
+    def close(self) -> None:
+        """No-op close method for benchmark compatibility."""
+        return None
