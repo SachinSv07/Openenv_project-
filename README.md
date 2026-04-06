@@ -177,6 +177,5 @@ openenvhackathon/
 ├── README.md
 ├── requirements.txt
 ├── scripts/
-├── tasks/
-└── openenv_support_env/
+└── tasks/
 ```
