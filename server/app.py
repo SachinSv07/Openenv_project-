@@ -31,11 +31,17 @@ def _run_baseline_once() -> None:
     with RESULT_LOCK:
         RESULT_LOG = text or "No output generated."
 
-# Start baseline thread on startup
-@app.on_event("startup")
-async def startup_event():
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
     worker = threading.Thread(target=_run_baseline_once, daemon=True)
     worker.start()
+    yield
+    # Shutdown if needed
+
+app.router.lifespan_context = lifespan
 
 @app.get("/health")
 def health():
