@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from env import SupportEnv
 from baseline import run_baseline
-from models import Action
+from models import Action, Observation, Reward
 
 app = FastAPI()
 env = SupportEnv(task_level=os.getenv("OPENENV_TASK", "hard"))
@@ -18,7 +18,7 @@ env = SupportEnv(task_level=os.getenv("OPENENV_TASK", "hard"))
 RESULT_LOG = "Starting benchmark run..."
 RESULT_LOCK = threading.Lock()
 
-def _run_baseline_once():
+def _run_baseline_once() -> None:
     global RESULT_LOG
     buffer = io.StringIO()
     try:
@@ -26,11 +26,12 @@ def _run_baseline_once():
             run_baseline(task_level=os.getenv("OPENENV_TASK", "hard"))
         text = buffer.getvalue().strip()
     except Exception as exc:
-        text = f"Runtime error while executing baseline: {{exc}}".format(exc=str(exc))
+        text = f"Runtime error while executing baseline: {exc}"
 
     with RESULT_LOCK:
         RESULT_LOG = text or "No output generated."
 
+# Start baseline thread on startup
 @app.on_event("startup")
 async def startup_event():
     worker = threading.Thread(target=_run_baseline_once, daemon=True)
@@ -59,21 +60,26 @@ async def root():
     with RESULT_LOCK:
         body_text = RESULT_LOG
     escaped = html.escape(body_text)
-    page = """
-<html><head><title>OpenEnv Support Benchmark</title>
-<meta charset='utf-8'></head><body>
-<h1>OpenEnv Support Benchmark</h1>
-<p>Container is running. Latest baseline output:</p>
-<pre>{escaped}</pre>
-<h2>FastAPI Endpoints Ready:</h2>
-<ul>
-<li>GET /health</li>
-<li>POST /reset</li>
-<li>POST /step</li>
-</ul>
-</body></html>
-    """.format(escaped=escaped)
+    page = (
+        '<html><head><title>OpenEnv Support Benchmark</title>'
+        '<meta charset="utf-8"></head><body>'
+        '<h1>OpenEnv Support Benchmark</h1>'
+        '<p>Container is running. Latest baseline output:</p>'
+        '<pre>' + escaped + '</pre>'
+        '<h2>FastAPI Endpoints Ready:</h2>'
+        '<ul>'
+        '<li>GET /health</li>'
+        '<li>POST /reset</li>'
+        '<li>POST /step {"action_type": "..."}</li>'
+        '</ul>'
+        '</body></html>'
+    )
     return HTMLResponse(content=page)
 
+def main():
+    port = int(os.getenv("PORT", "7860"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
+if __name__ == "__main__":
+    main()
 

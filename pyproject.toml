@@ -7,11 +7,16 @@ name = "openenv-hackathon"
 version = "0.1.0"
 description = "Customer support environment for OpenEnv hackathon"
 dependencies = [
+  "openenv-core>=0.2.0",
   "pydantic>=2.6,<3.0",
   "openai>=1.30.0",
   "fastapi>=0.100.0",
   "uvicorn[standard]>=0.25.0",
 ]
+requires-python = ">=3.10"
+
+[project.scripts]
+server = "app:main"
 
 [project.optional-dependencies]
 dev = [
@@ -19,6 +24,4 @@ dev = [
   "ruff",
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/openenvhackathon"]
 
