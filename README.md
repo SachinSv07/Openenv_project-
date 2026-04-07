@@ -1,3 +1,12 @@
+---
+title: Customer Support OpenEnv
+emoji: 🤖
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_file: baseline.py
+pinned: false
+---
 # Customer Support AI Evaluation Environment (OpenEnv)
 
 ## Overview
